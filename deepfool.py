@@ -12,7 +12,7 @@ def convert_label(number):
     return LABELS_SYNSET[np.int(number)].split(',')[0]
 
 
-def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50, only_cpu=False):
+def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50, only_cpu=False, shadow=[]):
     """
        :param image: Image of size HxWx3
        :param net: network (input: images, output: values of activation **BEFORE** softmax).
@@ -36,9 +36,10 @@ def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50, only_cpu=F
     f_image = net.forward(Variable(image[None, :, :, :], requires_grad=True)).data.cpu().numpy().flatten()
     I = (np.array(f_image)).flatten().argsort()[::-1]
     I = I[0:num_classes]
-    shadow = [1, 2, 3]
-    num_classes = num_classes - len(shadow)
-    I = np.delete(I, shadow)
+    if shadow:
+        print("Shadow: " + str(shadow))
+        num_classes = num_classes - len(shadow)
+        I = np.delete(I, shadow)
     print("I : " + str(I))
     for i in I:
         print(convert_label(i))

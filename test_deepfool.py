@@ -20,6 +20,7 @@ import os
 PATH_IMAGE = '161749_2s-panneau_stop.jpg'
 # PATH_IMAGE = '161850-2m53-person.jpg'
 NUMBER_DEEP_FOOL = 1
+SAVE = False
 
 
 def show_image(image, title=""):
@@ -37,13 +38,11 @@ def clip_tensor(A, minv, maxv):
 
 
 def main():
-    # Switch to evaluation mode
-    im_orig = Image.open(PATH_IMAGE)
-    show_image(im_orig, "image origin")
-
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
     clip = lambda x: clip_tensor(x, 0, 255)
+
+    #  Defining transformations
     # Remove the mean
     trans_im = transforms.Compose([
         transforms.Resize(256),
@@ -52,23 +51,27 @@ def main():
         transforms.Normalize(mean=mean,
                              std=std)])
 
-    trans_pil = transforms.ToPILImage()
-
+    # Crop and transform to tensor
     trans_im_2 = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor()])
 
+    # Transform to PIL image format
+    trans_pil = transforms.ToPILImage()
+
+    # Retrieve classic image format
     tf = transforms.Compose([transforms.Normalize(mean=[0, 0, 0], std=map(lambda x: 1 / x, std)),
                              transforms.Normalize(mean=map(lambda x: -x, mean), std=[1, 1, 1]),
                              transforms.Lambda(clip),
                              transforms.ToPILImage(),
                              transforms.CenterCrop(224)])
 
+    # Classic image format with cropping
     tf_2 = transforms.Compose([transforms.ToPILImage(),
                                transforms.CenterCrop(224)])
 
-    # im = trans_im(im_orig)
+    im_orig = Image.open(PATH_IMAGE)
     im = trans_im(im_orig)
     show_image(trans_pil(im), "image trans_im")
 
@@ -79,7 +82,7 @@ def main():
         net.eval()
         print("Fooling " + str(iteration) + "/" + str(NUMBER_DEEP_FOOL))
         r, loop_i, label_orig_temp, label_pert, pert_image = \
-            deepfool(current_image, net, num_classes=10, only_cpu=True)
+            deepfool(current_image, net, num_classes=10, only_cpu=True, shadow=[1, 2])
         #  Converting labels in real world words
         str_label_orig_temp = convert_label(label_orig_temp)
         str_label_pert = convert_label(label_pert)
@@ -88,38 +91,37 @@ def main():
         #  Retrieving image
         pert_image_raw = pert_image.cpu()[0]
         pert_image_show = tf(pert_image_raw)
-        show_image(pert_image_show, str_label_orig_temp + "->" + str_label_pert)
-        #  Preparing image for new run
-        current_image = trans_im(pert_image_show)
-        show_image(trans_pil(current_image), "new image analysis")
+        show_image(pert_image_show, "Fooling " + str_label_orig_temp + "->" + str_label_pert)
 
         if iteration < NUMBER_DEEP_FOOL:
             # If not last iteration
-            pass
+            #  Preparing image for new run
+            current_image = trans_im(pert_image_show)
+            show_image(trans_pil(current_image), "new image to fool")
         else:
             str_label_orig = les_str_labels_orig[0]
 
     print("Original label = ", str_label_orig)
     print("Perturbed label = ", str_label_pert)
 
+    #  Building output image names
     name_label_pert = '_'.join(str_label_pert.split(" ")[1:])
     name_label_orig = '_'.join(str_label_orig.split(" ")[1:])
     path_pert_image = PATH_IMAGE.replace(".jpg", "-" + name_label_orig + "-" + name_label_pert + ".jpg")
     path_pert_only_image = path_pert_image.replace(".jpg", "_pert-only.jpg")
 
-    print("Saving pert image to " + path_pert_image)
-    # pert_image_raw = pert_image.cpu()[0]
-    # pert_image = trans_pil(pert_image_raw)
-    pert_image_to_save = pert_image_show
-    pert_image_to_save.save(path_pert_image)
+    #  Compute pert only image
+    pert_only_image = ImageChops.subtract(tf_2(trans_im_2(im_orig)), pert_image_show, scale=1.0/255)
+    show_image(pert_only_image, "pert only")
 
-    with open(PATH_IMAGE.replace(".jpg", ".txt"), 'w') as file:
-        file.write(" -> ".join(les_str_labels_orig + [str_label_pert]))
-
-    print("Saving pert only image to " + path_pert_only_image)
-    # orig_image = trans_pil(im_orig)
-    pert_only_image = ImageChops.subtract(tf_2(trans_im_2(im_orig)), pert_image_show)
-    pert_only_image.save(path_pert_only_image)
+    if SAVE:
+        with open(PATH_IMAGE.replace(".jpg", ".txt"), 'w') as file:
+            file.write(" -> ".join(les_str_labels_orig + [str_label_pert]))
+        print("Saving pert image to " + path_pert_image)
+        pert_image_to_save = pert_image_show
+        pert_image_to_save.save(path_pert_image)
+        print("Saving pert only image to " + path_pert_only_image)
+        pert_only_image.save(path_pert_only_image)
 
 
 if __name__ == "__main__":
