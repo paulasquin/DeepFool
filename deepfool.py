@@ -33,6 +33,8 @@ def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50, only_cpu=F
     else:
         print("Using CPU")
 
+    #  SSI comment: here we use the last flatten network to explore perturbations in the right direction
+    #  Thus, this is not a "bruteforce" method
     f_image = net.forward(Variable(image[None, :, :, :], requires_grad=True)).data.cpu().numpy().flatten()
     I = (np.array(f_image)).flatten().argsort()[::-1]
     I = I[0:num_classes]
