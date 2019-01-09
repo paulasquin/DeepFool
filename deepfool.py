@@ -39,10 +39,11 @@ def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50, only_cpu=F
     I = (np.array(f_image)).flatten().argsort()[::-1]
     I = I[0:num_classes]
     if shadow:
-        print("Shadow: " + str(shadow))
+        print("Shadowing labels: " + str(shadow))
         num_classes = num_classes - len(shadow)
         I = np.delete(I, shadow)
-    print("I : " + str(I))
+    print("id labels found, I: " + str(I))
+    print("Corresponding labels:")
     for i in I:
         print(convert_label(i))
     label = I[0]

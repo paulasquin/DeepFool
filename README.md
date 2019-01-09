@@ -34,7 +34,9 @@ The parameters of the function are:
 
 ## test_deepfool.py
 
-A simple demo which computes the adversarial perturbation for a test image from ImageNet dataset.
+Computes the adversarial perturbation using SSI team addings, like :
+- Shadow methods: adversarial labels skipped to go deeper in Fooling
+- Rerun the fooling loop
 
 ## Reference
 [1] S. Moosavi-Dezfooli, A. Fawzi, P. Frossard:

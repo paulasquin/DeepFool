@@ -19,8 +19,10 @@ import os
 
 PATH_IMAGE = '161749_2s-panneau_stop.jpg'
 # PATH_IMAGE = '161850-2m53-person.jpg'
-NUMBER_DEEP_FOOL = 1
-SAVE = False
+NUMBER_DEEP_FOOL = 1  # Times to run the fooling loop process
+SAVE = False  # Save as .jpg (True) or just displaying (False)?
+SHADOW = [1, 2]  #  Which label id to shadow, in order to move to the next ones.
+# This is another SSI method to go deeper in the fooling process
 
 
 def show_image(image, title=""):
@@ -82,7 +84,7 @@ def main():
         net.eval()
         print("Fooling " + str(iteration) + "/" + str(NUMBER_DEEP_FOOL))
         r, loop_i, label_orig_temp, label_pert, pert_image = \
-            deepfool(current_image, net, num_classes=10, only_cpu=True, shadow=[1, 2])
+            deepfool(current_image, net, num_classes=10, only_cpu=True, shadow=SHADOW)
         #  Converting labels in real world words
         str_label_orig_temp = convert_label(label_orig_temp)
         str_label_pert = convert_label(label_pert)
@@ -111,7 +113,7 @@ def main():
     path_pert_only_image = path_pert_image.replace(".jpg", "_pert-only.jpg")
 
     #  Compute pert only image
-    pert_only_image = ImageChops.subtract(tf_2(trans_im_2(im_orig)), pert_image_show, scale=1.0/255)
+    pert_only_image = ImageChops.subtract(tf_2(trans_im_2(im_orig)), pert_image_show, scale=1.0 / 255)
     show_image(pert_only_image, "pert only")
 
     if SAVE:
