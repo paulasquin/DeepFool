@@ -10,6 +10,12 @@ Ensure that you have python3 and pip, then run:
 pip3 install -r requirements.txt
 
 ```
+Note : This command will install Torch, ~500MB  
+
+You will also need tkinter
+```bash
+sudo apt-get install python-tk python3-tk
+```
 
 # Function descripion
 
