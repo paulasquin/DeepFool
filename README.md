@@ -2,7 +2,7 @@
 
 This project have been developed for a Computer Science course on Cybersecurity from the engineering school CentraleSupélec. 
 
-# DeepFool
+# DeepFool
 This tool is based on the Github Project [DeepFool](https://github.com/LTS4/DeepFool).  
 We use it to modify images, making them mis-classified by the Deep Learning model ResNet34.
 These modification are invisible to the human eye.
@@ -61,7 +61,7 @@ pipenv shell
 ```
 This process can be quite long depending your internet connection.
 
-## Proceed the Machine Duping
+## Proceed to the Machine Duping
 To run the attack: 
 ```bash
 sh run_attack_many.sh
