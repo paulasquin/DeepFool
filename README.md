@@ -66,7 +66,7 @@ To run the attack:
 ```bash
 sh run_attack_many.sh
 ```
-It will create several perturbed images in the optimization_output/l1basedmask_uniformrectangles/noisy_images folder.  
+It will create several perturbed images in the ```optimization_output/l1basedmask_uniformrectangles/noisy_images``` folder.  
 Take one of the images (the last one for instance) and put it in a new folder, ‘test_set’.  
 You can try to classify the perturbed image : 
 ```bash
